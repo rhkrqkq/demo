@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.ErrorResponse;
 
 import java.time.LocalDateTime;
 
@@ -37,7 +36,7 @@ public class Board {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void update(String title, String content, LocalDateTime updatedAt) {
+    public void update(String title, String content) {
         this.title = title;
         this.content = content;
         this.updatedAt = LocalDateTime.now();

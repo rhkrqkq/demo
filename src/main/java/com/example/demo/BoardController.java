@@ -1,34 +1,46 @@
 package com.example.demo;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/board")
+@Controller
 @RequiredArgsConstructor
+@RequestMapping("/board")
 public class BoardController {
 
     private final BoardService boardService;
 
-    @PostMapping
-    public Long create(@RequestBody BoardRequestDTO requestDTO) {
-        return boardService.savePost(requestDTO);
+    @GetMapping("/list")
+    public String list(Model model) {
+        List<BoardResponseDTO> boards = boardService.findAllPost();
+        model.addAttribute("boards", boards);
+
+        return "board/list";
     }
 
-    @GetMapping
-    public List<BoardResponseDTO> list() {
-        return boardService.findAllPost();
+    @GetMapping("/write")
+    public String write(@RequestParam(value = "id", required = false) Long id, Model model) {
+        if (id != null) {
+            BoardResponseDTO board = boardService.findPostById(id);
+            model.addAttribute("board", board);
+        } else {
+            model.addAttribute("board", new BoardResponseDTO());
+        }
+        return "board/write";
     }
 
-    @PatchMapping("/{id}")
-    public Long update(@PathVariable Long id, @RequestBody BoardRequestDTO requestDTO) {
-        return boardService.update(id, requestDTO);
-    }
+    @GetMapping("/view/{id}")
+    public String view(@PathVariable Long id, Model model) {
+        BoardResponseDTO board = boardService.findPostById(id);
+        model.addAttribute("board", board);
 
-    @DeleteMapping("/{id}")
-    public Long delete(@PathVariable Long id) {
-        return boardService.delete(id);
+        return "board/view";
     }
 }

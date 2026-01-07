@@ -25,11 +25,12 @@ public class BoardService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public Long update(Long id, BoardRequestDTO requestDTO) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다"));
 
-        board.update(requestDTO.getTitle(), requestDTO.getContent(), requestDTO.getUpdatedAt());
+        board.update(requestDTO.getTitle(), requestDTO.getContent());
 
         return id;
     }
@@ -41,5 +42,13 @@ public class BoardService {
 
         boardRepository.delete(board);
         return id;
+    }
+
+    @Transactional(readOnly = true)
+    public BoardResponseDTO findPostById(Long id) {
+        Board entity = boardRepository.findById(id)
+                .orElseThrow(()-> new IllegalArgumentException("해당 게시글이 없습니다."));
+
+        return new BoardResponseDTO(entity);
     }
 }

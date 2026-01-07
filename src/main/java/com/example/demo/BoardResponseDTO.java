@@ -1,10 +1,12 @@
 package com.example.demo;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
+@NoArgsConstructor
 public class BoardResponseDTO {
     private Long id;
     private String title;
