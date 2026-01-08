@@ -1,48 +1,51 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>게시글 상세 보기</title>
 </head>
 <body>
 <h2>게시글 상세 보기</h2>
-<table th:object="${board}">
+<table>
     <tr>
         <th>번호</th>
-        <td id="boardId" th:text="*{id}"></td>
+        <td id="boardId">${board.id}</td>
     </tr>
     <tr>
         <th>작성일</th>
-        <td th:text="${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        <td>${board.createdAt}</td>
     </tr>
     <tr>
         <th>작성자</th>
-        <td th:text="*{writer}"></td>
+        <td>${board.writer}</td>
     </tr>
     <tr>
         <th>제목</th>
-        <td th:text="*{title}"></td>
+        <td>${board.title}</td>
     </tr>
     <tr>
         <th>내용</th>
-        <td th:text="*{content}"></td>
+        <td>${board.content}</td>
     </tr>
 </table>
 
 <br>
 <a href="/board/list">목록으로</a>
-<a th:href="@{/board/write(id=${board.id})}">수정하기</a>
+<a href="/board/write?id=${board.id}">수정하기</a>
 <button type="button" onclick="deleteBoard()">삭제하기</button>
 
-<script th:inline="javascript">
+<script>
     function deleteBoard() {
-        const id = document.getElementById('boardId').innerText; // 타임리프 변수를 자바스크립트에서 사용
+        const id = document.getElementById('boardId').innerText;
 
         if (!confirm(id + '번 게시글을 삭제할까요?')) {
             return;
         }
 
-        fetch(`/api/board/${id}`, {
+        fetch(`/api/board/\${id}`, {
             method: 'DELETE'
         }).then(response => {
             if (response.ok) {
