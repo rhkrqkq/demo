@@ -33,8 +33,10 @@
 </table>
 
 <br>
-<a href="/board/list">목록으로</a>
-<a href="/board/write?id=${board.id}">수정하기</a>
+<c:set var="queryParams" value="page=${param.page}&keyword=${param.keyword}" />
+
+<a href="/board/list?page=${param.page}&keyword=${param.keyword}">목록으로</a>
+<a href="/board/write?id=${board.id}&page=${param.page}&keyword=${param.keyword}">수정하기</a>
 <button type="button" onclick="deleteBoard()">삭제하기</button>
 
 <script>

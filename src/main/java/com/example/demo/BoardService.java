@@ -1,6 +1,9 @@
 package com.example.demo;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,5 +53,16 @@ public class BoardService {
                 .orElseThrow(()-> new IllegalArgumentException("해당 게시글이 없습니다."));
 
         return new BoardResponseDTO(entity);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<BoardResponseDTO> findAllPost(String keyword, Pageable pageable) {
+        Page<Board> page;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            page = boardRepository.findAll(pageable);
+        } else {
+            page = boardRepository.findByTitleContaining(keyword, pageable);
+        }
+        return page.map(BoardResponseDTO::new);
     }
 }

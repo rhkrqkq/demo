@@ -38,6 +38,9 @@
 <script>
     function save() {
         const id = document.getElementById('boardId').value;
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = urlParams.get('page') || 0;
+        const keyword = urlParams.get('keyword') || '';
         const params = {
             title: document.getElementById('title').value,
             writer: document.getElementById('writer').value,
@@ -55,7 +58,7 @@
             .then(response => {
                 if (response.ok) {
                     alert('저장이 완료되었습니다.');
-                    location.href = '/board/list';
+                    location.href = `/board/list?page=\${page}&keyword=\${keyword}`;
                 } else {
                     alert('저장에 실패했습니다.');
                 }
