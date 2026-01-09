@@ -1,5 +1,6 @@
-package com.example.demo;
+package com.example.demo.dto;
 
+import com.example.demo.domain.Board;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;

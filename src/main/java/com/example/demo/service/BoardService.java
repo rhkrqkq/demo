@@ -1,9 +1,12 @@
-package com.example.demo;
+package com.example.demo.service;
 
+import com.example.demo.domain.Board;
+import com.example.demo.dto.BoardRequestDTO;
+import com.example.demo.dto.BoardResponseDTO;
+import com.example.demo.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

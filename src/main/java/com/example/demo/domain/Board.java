@@ -1,4 +1,4 @@
-package com.example.demo;
+package com.example.demo.domain;
 
 import jakarta.persistence.*;
 import lombok.Builder;
