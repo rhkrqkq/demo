@@ -1,9 +1,11 @@
 package com.example.demo.domain;
 
+import com.example.demo.dto.BoardResponseDTO;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -27,6 +29,8 @@ public class Board {
 
     private LocalDateTime updatedAt;
 
+    private int hits;
+
     @Builder
     public Board(String title, String content, String writer) {
         this.title = title;
@@ -34,6 +38,7 @@ public class Board {
         this.writer = writer;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+        this.hits = 0;
     }
 
     public void update(String title, String content) {
@@ -41,4 +46,9 @@ public class Board {
         this.content = content;
         this.updatedAt = LocalDateTime.now();
     }
+
+    public void increaseHits() {
+        this.hits++;
+    }
+
 }

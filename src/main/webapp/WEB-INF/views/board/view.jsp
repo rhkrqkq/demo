@@ -14,6 +14,7 @@
     <tr><th>작성자</th><td>${board.writer}</td></tr>
     <tr><th>제목</th><td>${board.title}</td></tr>
     <tr><th>내용</th><td>${board.content}</td></tr>
+    <tr><th>조회수</th><td>${board.hits}</td></tr>
 </table>
 
 <br>

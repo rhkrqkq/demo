@@ -50,11 +50,13 @@ public class BoardService {
         return id;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public BoardResponseDTO findPostById(Long id) {
         Board entity = boardRepository.findById(id)
                 .orElseThrow(()-> new IllegalArgumentException("해당 게시글이 없습니다."));
 
+        // 상세보기 시 조회수 증가
+        entity.increaseHits();
         return new BoardResponseDTO(entity);
     }
 
@@ -68,4 +70,5 @@ public class BoardService {
         }
         return page.map(BoardResponseDTO::new);
     }
+
 }

@@ -13,6 +13,7 @@ public class BoardResponseDTO {
     private String title;
     private String content;
     private String writer;
+    private int hits;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -21,6 +22,7 @@ public class BoardResponseDTO {
         this.title = entity.getTitle();
         this.content = entity.getContent();
         this.writer = entity.getWriter();
+        this.hits = entity.getHits();
         this.createdAt = entity.getCreatedAt();
         this.updatedAt = entity.getUpdatedAt();
     }
