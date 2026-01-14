@@ -32,12 +32,17 @@ public class BoardService {
     }
 
     @Transactional
-    public Long update(Long id, BoardRequestDTO requestDTO) {
+    public Long update(Long id, BoardRequestDTO requestDTO, String loginName) {
+        // 수정할 엔티티 조회
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다"));
 
-        board.update(requestDTO.getTitle(), requestDTO.getContent());
+        // 작성자 검증 로직을 서비스 레이어에 배치
+        if (!board.getWriter().equals(loginName)) {
+            throw new RuntimeException("작성자만 수정할 수 있습니다.");
+        }
 
+        board.update(requestDTO.getTitle(), requestDTO.getContent());
         return id;
     }
 

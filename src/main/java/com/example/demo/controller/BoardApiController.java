@@ -43,7 +43,9 @@ public class BoardApiController {
         if (!existBoard.getWriter().equals(loginMember.getName())) {
             throw new RuntimeException("수정 권한이 없습니다.");
         }
-        return boardService.update(id, requestDTO);
+
+        // 서비스 단으로 로그인 정보와 함께 수정 요청
+        return boardService.update(id, requestDTO, loginMember.getName());
     }
 
     @DeleteMapping("/{id}")

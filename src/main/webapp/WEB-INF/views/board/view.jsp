@@ -62,13 +62,18 @@
         const id = document.getElementById('boardId').innerText;
         if (!confirm(id + '번 게시글을 삭제할까요?')) return;
 
-        fetch(`/api/board/\${id}`, { method: 'DELETE' })
-            .then(response => {
+        fetch(`/api/board/${id}`, { method: 'DELETE' })
+            .then(async response => {
                 if (response.ok) {
                     alert('삭제되었습니다.');
-                    location.href = '/board/list?page=${param.page}&keyword=${param.keyword}';
+                    location.href = '/board/list';
+                } else {
+                    // 서버가 보낸 에러 메시지("삭제 권한이 없습니다." 등)를 읽어서 띄웁니다.
+                    const errorMsg = await response.text();
+                    alert(errorMsg);
                 }
-            });
+            })
+            .catch(error => alert('네트워크 오류가 발생했습니다.'));
     }
 
     function addComment(boardId) {
