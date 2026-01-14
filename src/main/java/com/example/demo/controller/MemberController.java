@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ public class MemberController {
     @Autowired
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     // 회원가입 페이지 이동
     @GetMapping("/signup")
@@ -28,7 +30,17 @@ public class MemberController {
     // 회원가입 처리
     @PostMapping("/signup")
     public String signup(@ModelAttribute MemberRequestDTO memberRequestDTO) {
-        memberRepository.save(memberRequestDTO.toEntity());
+        // 엔티티를 DTO로 변환
+        Member member = memberRequestDTO.toEntity();
+
+        // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(member.getPassword());
+
+        // 암호화된 비밀번호를 엔티티에 세팅
+        member.encodePassword(encodedPassword);
+
+        // 저장
+        memberRepository.save(member);
         return "redirect:/login";
     }
 

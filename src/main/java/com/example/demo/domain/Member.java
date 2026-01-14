@@ -27,4 +27,8 @@ public class Member {
         this.password = password;
         this.name = name;
     }
+
+    public void encodePassword(String encodedPassword) {
+        this.password = encodedPassword;
+    }
 }
