@@ -1,79 +1,50 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>게시판 목록 (JSP)</title>
-    <style>
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #f2f2f2; }
-        .pagination { margin-top: 20px; text-align: center; }
-        .pagination a { margin: 0 5px; text-decoration: none; color: black; }
-        .active { font-weight: bold; color: red !important; }
-    </style>
-</head>
+<head><title>게시판 목록</title></head>
 <body>
 <%@ include file="header.jsp" %>
-<h2>게시판 목록</h2>
 
-<div style="margin-bottom: 10px;">
-    <form action="/board/list" method="get">
-        <input type="text" name="keyword" value="${keyword}" placeholder="제목 검색">
-        <button type="submit">검색</button>
-    </form>
-</div>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">게시판 목록</h2>
+        <a href="/board/write" class="btn btn-primary px-4">글쓰기</a>
+    </div>
 
-<table>
-    <thead>
-    <tr>
-        <th>번호</th>
-        <th>제목</th>
-        <th>작성자</th>
-        <th>작성일</th>
-    </tr>
-    </thead>
-    <tbody>
-    <c:choose>
-        <c:when test="${not empty boards.content}">
+    <div class="table-responsive bg-white rounded shadow-sm">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+            <tr>
+                <th class="ps-4">번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>날짜</th>
+                <th class="text-center">조회수</th>
+            </tr>
+            </thead>
+            <tbody>
             <c:forEach var="board" items="${boards.content}">
                 <tr>
-                    <td>${board.id}</td>
-                    <td>
-                            <%-- 상세 보기 이동 시 page와 keyword 정보 전달 --%>
-                        <a href="/board/view/${board.id}?page=${boards.number}&keyword=${keyword}">${board.title}</a>
-                    </td>
+                    <td class="ps-4 text-muted">${board.id}</td>
+                    <td><a href="/board/view/${board.id}" class="text-decoration-none text-dark fw-bold">${board.title}</a></td>
                     <td>${board.writer}</td>
-                    <td>${board.createdAt.toLocalDate()} ${board.createdAt.toLocalTime()}</td>
+                    <td><small class="text-muted">${board.createdAt}</small></td>
+                    <td class="text-center"><span class="badge bg-secondary rounded-pill">${board.hits}</span></td>
                 </tr>
             </c:forEach>
-        </c:when>
-        <c:otherwise>
-            <tr><td colspan="4">게시글이 없습니다.</td></tr>
-        </c:otherwise>
-    </c:choose>
-    </tbody>
-</table>
+            </tbody>
+        </table>
+    </div>
 
-<div class="pagination">
-    <c:if test="${boards.hasPrevious()}">
-        <a href="/board/list?page=${boards.number - 1}&keyword=${keyword}">이전</a>
-    </c:if>
-    <c:forEach var="i" begin="0" end="${boards.totalPages - 1}">
-        <c:if test="${i >= boards.number - 5 && i <= boards.number + 5}">
-            <a href="/board/list?page=${i}&keyword=${keyword}" class="${i == boards.number ? 'active' : ''}">${i + 1}</a>
-        </c:if>
-    </c:forEach>
-    <c:if test="${boards.hasNext()}">
-        <a href="/board/list?page=${boards.number + 1}&keyword=${keyword}">다음</a>
-    </c:if>
+    <form action="/board/list" method="get" class="row g-2 justify-content-center mt-4">
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="text" name="keyword" class="form-control" placeholder="검색어를 입력하세요..." value="${param.keyword}">
+                <button class="btn btn-dark" type="submit">검색</button>
+            </div>
+        </div>
+    </form>
 </div>
-<br>
-<%-- 로그인한 사용자만 글쓰기 가능 --%>
-<c:if test="${not empty sessionScope.loginMember}">
-    <a href="/board/write">글쓰기</a>
-</c:if>
 </body>
 </html>

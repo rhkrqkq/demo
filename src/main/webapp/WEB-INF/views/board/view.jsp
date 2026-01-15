@@ -4,64 +4,104 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>게시글 상세 보기</title>
+    <title>${board.title}</title>
+    <style>
+        .post-container { max-width: 900px; margin: 0 auto; }
+        .post-content { min-height: 300px; white-space: pre-wrap; line-height: 1.6; }
+        .comment-item { transition: background 0.2s; }
+        .comment-item:hover { background-color: #f8f9fa; }
+    </style>
 </head>
-<body>
+<body class="bg-light">
 <%@ include file="header.jsp" %>
-<h2>게시글 상세 보기</h2>
-<table>
-    <tr><th>번호</th><td id="boardId">${board.id}</td></tr>
-    <tr><th>작성자</th><td>${board.writer}</td></tr>
-    <tr><th>제목</th><td>${board.title}</td></tr>
-    <tr><th>내용</th><td>${board.content}</td></tr>
-    <tr><th>조회수</th><td>${board.hits}</td></tr>
-</table>
 
-<br>
-<a href="/board/list?page=${param.page}&keyword=${param.keyword}">목록으로</a>
+<div class="container py-5 post-container">
+    <%-- 게시글 영역 --%>
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-5">
+            <%-- 메타 정보 --%>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge bg-primary px-3 py-2">No. <span id="boardId">${board.id}</span></span>
+                <div class="text-muted small">
+                    <span class="me-3">👤 ${board.writer}</span>
+                    <span>👀 조회수 ${board.hits}</span>
+                </div>
+            </div>
 
-<c:if test="${sessionScope.loginMember.name eq board.writer}">
-    <a href="/board/write?id=${board.id}&page=${param.page}&keyword=${param.keyword}">수정하기</a>
-    <button type="button" onclick="deleteBoard()">삭제하기</button>
-</c:if>
+            <%-- 제목 --%>
+            <h1 class="fw-bold mb-4">${board.title}</h1>
+            <hr class="text-secondary opacity-25">
 
-<hr>
-<h3>댓글 (${comments.size()})</h3>
+            <%-- 본문 --%>
+            <div class="post-content fs-5 mb-5">${board.content}</div>
 
-<%-- 댓글 목록 (중복 제거된 단일 루프) --%>
-<div id="comment-list">
-    <c:forEach var="comment" items="${comments}">
-        <div id="comment-container-${comment.id}" style="border-bottom: 1px solid #eee; padding: 10px;">
-            <strong>${comment.writer}</strong>
-            <small style="color: gray;">${comment.createdAt}</small>
+            <%-- 하단 버튼 영역 --%>
+            <div class="d-flex justify-content-between border-top pt-4">
+                <a href="/board/list?page=${param.page}&keyword=${param.keyword}" class="btn btn-outline-dark">
+                    ← 목록으로
+                </a>
 
-                <%-- ID가 content-${comment.id}인 이 부분이 중요합니다 --%>
-            <p id="content-${comment.id}">${comment.content}</p>
+                <c:if test="${sessionScope.loginMember.name eq board.writer}">
+                    <div>
+                        <a href="/board/write?id=${board.id}&page=${param.page}&keyword=${param.keyword}"
+                           class="btn btn-warning me-1">수정하기</a>
+                        <button type="button" class="btn btn-danger" onclick="deleteBoard()">삭제하기</button>
+                    </div>
+                </c:if>
+            </div>
+        </div>
+    </div>
 
-            <c:if test="${sessionScope.loginMember.name eq comment.writer}">
-                <div id="btn-group-${comment.id}">
-                    <button type="button" onclick="showEditForm(${comment.id})">수정</button>
-                    <button type="button" onclick="deleteComment(${comment.id})" style="color:red;">삭제</button>
+    <%-- 댓글 영역 --%>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <h5 class="fw-bold mb-4">💬 댓글 (${comments.size()})</h5>
+
+            <%-- 댓글 입력 --%>
+            <c:if test="${not empty sessionScope.loginMember}">
+                <div class="mb-4 bg-light p-3 rounded">
+                    <textarea id="commentContent" class="form-control mb-2" rows="3"
+                              placeholder="내용을 입력해주세요"></textarea>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary px-4"
+                                onclick="addComment(${board.id})">댓글 등록</button>
+                    </div>
                 </div>
             </c:if>
+
+            <%-- 댓글 목록 --%>
+            <div id="comment-list">
+                <c:forEach var="comment" items="${comments}">
+                    <div id="comment-container-${comment.id}" class="comment-item border-bottom py-3 px-2">
+                        <div class="d-flex justify-content-between mb-2">
+                            <strong>${comment.writer}</strong>
+                            <small class="text-muted">${comment.createdAt}</small>
+                        </div>
+
+                        <p id="content-${comment.id}" class="mb-2 text-secondary">${comment.content}</p>
+
+                        <c:if test="${sessionScope.loginMember.name eq comment.writer}">
+                            <div id="btn-group-${comment.id}" class="text-end">
+                                <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 me-2"
+                                        onclick="showEditForm(${comment.id})">수정</button>
+                                <button type="button" class="btn btn-sm btn-link text-decoration-none text-danger p-0"
+                                        onclick="deleteComment(${comment.id})">삭제</button>
+                            </div>
+                        </c:if>
+                    </div>
+                </c:forEach>
+                <c:if test="${empty comments}">
+                    <p class="text-center text-muted py-4">첫 번째 댓글을 남겨보세요!</p>
+                </c:if>
+            </div>
         </div>
-    </c:forEach>
-</div>
-
-<%-- 댓글 입력 --%>
-<c:if test="${not empty sessionScope.loginMember}">
-    <div style="margin-top: 20px; padding: 10px; background: #f9f9f9;">
-        <textarea id="commentContent" rows="3" style="width: 100%;"></textarea>
-        <button type="button" onclick="addComment(${board.id})">댓글 등록</button>
     </div>
-</c:if>
-
-
+</div>
 
 <script>
     function deleteBoard() {
         const id = document.getElementById('boardId').innerText;
-        if (!confirm(id + '번 게시글을 삭제할까요?')) return;
+        if (!confirm('정말로 삭제하시겠습니까?')) return;
         fetch(`/api/board/\${id}`, { method: 'DELETE' })
             .then(async res => {
                 if (res.ok) { alert('삭제되었습니다.'); location.href = '/board/list'; }
@@ -85,16 +125,15 @@
             .then(res => { if(res.ok) location.reload(); });
     }
 
-    // 수정 폼 전환 (백틱 안의 $ 앞에 \를 붙여야 JSP 에러가 안 납니다)
     function showEditForm(id) {
         const contentP = document.getElementById(`content-\${id}`);
         const btnGroup = document.getElementById(`btn-group-\${id}`);
         const originalContent = contentP.innerText;
 
-        contentP.innerHTML = `<textarea id="edit-input-\${id}" style="width:100%; height:60px;">\${originalContent}</textarea>`;
+        contentP.innerHTML = `<textarea id="edit-input-\${id}" class="form-control mb-2">\${originalContent}</textarea>`;
         btnGroup.innerHTML = `
-            <button type="button" onclick="updateComment(\${id})">저장</button>
-            <button type="button" onclick="location.reload()">취소</button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="updateComment(\${id})">저장</button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="location.reload()">취소</button>
         `;
     }
 
