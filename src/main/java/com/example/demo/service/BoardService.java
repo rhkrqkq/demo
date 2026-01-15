@@ -1,9 +1,12 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.Board;
+import com.example.demo.domain.Comment;
 import com.example.demo.dto.BoardRequestDTO;
 import com.example.demo.dto.BoardResponseDTO;
+import com.example.demo.dto.CommentResponseDTO;
 import com.example.demo.repository.BoardRepository;
+import com.example.demo.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 public class BoardService {
 
     private final BoardRepository boardRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public Long savePost(BoardRequestDTO requestDTO) {
@@ -74,6 +78,18 @@ public class BoardService {
             page = boardRepository.findByTitleContaining(keyword, pageable);
         }
         return page.map(BoardResponseDTO::new);
+    }
+
+    public List<BoardResponseDTO> findMyPosts(String writer) {
+        return boardRepository.findByWriterOrderByIdDesc(writer).stream()
+                .map(BoardResponseDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<CommentResponseDTO> findMyComments(String writer) {
+        return commentRepository.findByWriterOrderByCreatedAtDesc(writer).stream()
+                .map(CommentResponseDTO::new)
+                .collect(Collectors.toList());
     }
 
 }

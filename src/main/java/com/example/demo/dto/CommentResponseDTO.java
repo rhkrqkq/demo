@@ -11,11 +11,13 @@ public class CommentResponseDTO {
     private String content;
     private String writer;
     private LocalDateTime createdAt;
+    private Long boardId;
 
     public CommentResponseDTO(Comment entity) {
         this.id = entity.getId();
         this.content = entity.getContent();
         this.writer = entity.getWriter();
         this.createdAt = entity.getCreatedAt();
+        this.boardId = entity.getBoard().getId();
     }
 }

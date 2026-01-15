@@ -58,4 +58,13 @@ public class CommentService {
                 .orElseThrow(()-> new IllegalArgumentException("해당 댓글이 없습니다."));
         comment.update(commentRequestDTO.getContent());
     }
+
+    @Transactional(readOnly = true)
+    public List<CommentResponseDTO> findMyComments(String writer) {
+        List<Comment> comments = commentRepository.findByWriterOrderByCreatedAtDesc(writer);
+
+        return commentRepository.findByWriterOrderByCreatedAtDesc(writer).stream()
+                .map(CommentResponseDTO::new)
+                .collect(Collectors.toList());
+    }
 }

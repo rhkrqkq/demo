@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.domain.Member;
 import com.example.demo.repository.MemberRepository;
 import com.example.demo.dto.MemberRequestDTO;
+import com.example.demo.service.BoardService;
 import com.example.demo.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -20,6 +22,7 @@ public class MemberController {
     private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final BoardService boardService;
 
     // 회원가입 페이지 이동
     @GetMapping("/signup")
@@ -64,11 +67,25 @@ public class MemberController {
     }
 
     @GetMapping("/logout")
-    public String logout(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
+    public String logout(HttpSession session) {
         if (session != null) {
             session.invalidate();
         }
         return "redirect:/board/list";
     }
+
+    @GetMapping("/mypage")
+    public String myPage (HttpSession httpSession, Model model) {
+        Member loginMember = (Member) httpSession.getAttribute("loginMember");
+        if (loginMember == null) {
+            return "redirect:/login";
+        }
+
+        String writer = loginMember.getName();
+        model.addAttribute("myPosts", boardService.findMyPosts(writer));
+        model.addAttribute("myComments", boardService.findMyComments(writer));
+
+        return "mypage";
+    }
+
 }
