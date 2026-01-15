@@ -70,6 +70,10 @@ public class BoardApiController {
         }
 
         commentService.deleteComment(commentId);
+    }
 
+    @PatchMapping("/comments/{commentId}")
+    public void updateComment(@PathVariable Long commentId, @RequestBody CommentRequestDTO commentRequestDTO) {
+        commentService.updateComment(commentId, commentRequestDTO);
     }
 }

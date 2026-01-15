@@ -33,4 +33,8 @@ public class Comment {
         this.board = board;
         this.createdAt = LocalDateTime.now();
     }
+
+    public void update (String content) {
+        this.content = content;
+    }
 }

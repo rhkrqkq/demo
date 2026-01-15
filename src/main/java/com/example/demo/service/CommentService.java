@@ -52,5 +52,10 @@ public class CommentService {
         return new CommentResponseDTO(entity);
     }
 
-
+    @Transactional
+    public void updateComment (Long id, CommentRequestDTO commentRequestDTO) {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(()-> new IllegalArgumentException("해당 댓글이 없습니다."));
+        comment.update(commentRequestDTO.getContent());
+    }
 }
