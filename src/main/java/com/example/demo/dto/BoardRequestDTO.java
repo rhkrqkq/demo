@@ -21,9 +21,11 @@ public class BoardRequestDTO {
     private String writer;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String category;
 
     public Board toEntity() {
         return Board.builder()
+                .category(this.category)
                 .title(this.title)
                 .content(this.content)
                 .writer(this.writer)

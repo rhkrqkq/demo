@@ -1,9 +1,12 @@
 package com.example.demo.controller;
 
+import com.example.demo.domain.Member;
 import com.example.demo.dto.BoardResponseDTO;
 import com.example.demo.dto.CommentResponseDTO;
 import com.example.demo.service.BoardService;
+import com.example.demo.service.BookmarkService;
 import com.example.demo.service.CommentService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +25,7 @@ public class BoardController {
 
     private final BoardService boardService;
     private final CommentService commentService;
+    private final BookmarkService bookmarkService;
 
     @GetMapping("/list")
     public String list(Model model, @RequestParam(value = "page", defaultValue = "0") int page,
@@ -46,12 +50,17 @@ public class BoardController {
     }
 
     @GetMapping("/view/{id}")
-    public String view(@PathVariable Long id, Model model) {
+    public String view(@PathVariable Long id, HttpSession httpSession, Model model) {
         BoardResponseDTO board = boardService.findPostById(id);
         List<CommentResponseDTO> comments = commentService.findAllByBoard(id);
 
         model.addAttribute("board", board);
         model.addAttribute("comments", comments);
+
+        Member loginMember = (Member) httpSession.getAttribute("loginMember");
+        if (loginMember != null) {
+            model.addAttribute("isBookmarked", bookmarkService.isBookmarked(id, loginMember.getLoginId()));
+        }
         return "board/view";
     }
 

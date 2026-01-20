@@ -4,61 +4,42 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>${not empty board.id ? '게시글 수정' : '새 글 작성'}</title>
-    <style>
-        /* 추가적인 미세 디자인 조정 */
-        .write-container { max-width: 850px; }
-        .form-floating > .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1); }
-        .card { border-radius: 15px; overflow: hidden; }
-        .btn { border-radius: 8px; font-weight: 600; transition: all 0.2s; }
-    </style>
+    <title>글쓰기</title>
 </head>
 <body class="bg-light">
 <%@ include file="header.jsp" %>
 
-<div class="container py-5 write-container">
-    <%-- 상단 타이틀 영역 --%>
-    <div class="text-center mb-4">
-        <h2 class="fw-bold text-dark">
-            <c:choose>
-                <c:when test="${not empty board.id}">게시글 수정</c:when>
-                <c:otherwise>새 글 작성</c:otherwise>
-            </c:choose>
-        </h2>
-    </div>
-
-    <div class="card shadow-lg border-0">
+<div class="container py-5" style="max-width: 800px;">
+    <div class="card border-0 shadow-lg">
         <div class="card-body p-5">
+            <h3 class="fw-bold mb-4">${not empty board.id ? '게시글 수정' : '새 글 작성'}</h3>
+
             <form id="postForm">
-                <%-- Hidden ID --%>
                 <input type="hidden" id="boardId" value="${board.id}">
 
-                <%-- 제목 입력 (Floating Label) --%>
-                <div class="form-floating mb-4">
-                    <input type="text" class="form-control border-0 bg-light" id="title"
-                           placeholder="제목" value="${board.title}" style="font-size: 1.2rem; height: 70px;">
-                    <label for="title" class="text-secondary">제목을 입력하세요</label>
+                <%-- 카테고리 선택 --%>
+                <div class="form-floating mb-3">
+                    <select class="form-select border-0 bg-light" id="category">
+                        <option value="자유" ${board.category == '자유' ? 'selected' : ''}>자유게시판</option>
+                        <option value="정보" ${board.category == '정보' ? 'selected' : ''}>정보공유</option>
+                        <option value="공지" ${board.category == '공지' ? 'selected' : ''}>공지사항</option>
+                    </select>
+                    <label for="category">게시판 주제를 선택하세요</label>
                 </div>
 
-                <%-- 내용 입력 (Floating Label) --%>
-                <div class="form-floating mb-4">
-                    <textarea class="form-control border-0 bg-light" id="content"
-                              placeholder="내용" style="height: 450px; resize: none;">${board.content}</textarea>
-                    <label for="content" class="text-secondary">여기에 내용을 입력하세요</label>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control border-0 bg-light" id="title" value="${board.title}" placeholder="제목">
+                    <label for="title">제목</label>
                 </div>
 
-                <%-- 버튼 영역: 하단 배치 및 정렬 --%>
-                <div class="row g-3">
-                    <div class="col-6">
-                        <button type="button" class="btn btn-outline-secondary w-100 py-3" onclick="history.back()">
-                            취소하고 돌아가기
-                        </button>
-                    </div>
-                    <div class="col-6">
-                        <button type="button" class="btn btn-primary w-100 py-3 shadow-sm" onclick="savePost()">
-                            ${not empty board.id ? '수정 내용 저장' : '작성 완료'}
-                        </button>
-                    </div>
+                <div class="form-floating mb-4">
+                    <textarea class="form-control border-0 bg-light" id="content" style="height: 400px" placeholder="내용">${board.content}</textarea>
+                    <label for="content">내용을 입력하세요</label>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <button type="button" class="btn btn-light px-4" onclick="history.back()">취소</button>
+                    <button type="button" class="btn btn-primary px-5" onclick="savePost()">작성 완료</button>
                 </div>
             </form>
         </div>
@@ -68,32 +49,21 @@
 <script>
     function savePost() {
         const id = document.getElementById('boardId').value;
-        const title = document.getElementById('title').value;
-        const content = document.getElementById('content').value;
-
-        if(!title.trim() || !content.trim()) {
-            alert("제목과 내용을 모두 채워주세요!");
-            return;
-        }
+        const data = {
+            category: document.getElementById('category').value,
+            title: document.getElementById('title').value,
+            content: document.getElementById('content').value,
+            writer: "${sessionScope.loginMember.name}"
+        };
 
         const url = id ? `/api/board/\${id}` : '/api/board';
         const method = id ? 'PATCH' : 'POST';
-
-        const data = { title, content };
-        if (!id) data.writer = "${sessionScope.loginMember.name}";
 
         fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
-        }).then(res => {
-            if(res.ok) {
-                alert(id ? "성공적으로 수정되었습니다." : "게시글이 등록되었습니다.");
-                location.href = '/board/list';
-            } else {
-                alert("처리 중 오류가 발생했습니다.");
-            }
-        });
+        }).then(res => res.ok && (location.href = '/board/list'));
     }
 </script>
 </body>

@@ -31,11 +31,14 @@ public class Board {
 
     private int hits;
 
+    private String category;
+
     @Builder
-    public Board(String title, String content, String writer) {
+    public Board(String title, String content, String writer, String category) {
         this.title = title;
         this.content = content;
         this.writer = writer;
+        this.category = category;
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
         this.hits = 0;

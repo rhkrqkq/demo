@@ -4,6 +4,7 @@ import com.example.demo.domain.Member;
 import com.example.demo.repository.MemberRepository;
 import com.example.demo.dto.MemberRequestDTO;
 import com.example.demo.service.BoardService;
+import com.example.demo.service.BookmarkService;
 import com.example.demo.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -23,6 +24,7 @@ public class MemberController {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final BoardService boardService;
+    private final BookmarkService bookmarkService;
 
     // 회원가입 페이지 이동
     @GetMapping("/signup")
@@ -84,6 +86,7 @@ public class MemberController {
         String writer = loginMember.getName();
         model.addAttribute("myPosts", boardService.findMyPosts(writer));
         model.addAttribute("myComments", boardService.findMyComments(writer));
+        model.addAttribute("myBookmarks", bookmarkService.findMyBookmarks(loginMember.getLoginId()));
 
         return "mypage";
     }

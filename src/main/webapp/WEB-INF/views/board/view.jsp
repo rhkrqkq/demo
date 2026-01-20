@@ -7,48 +7,31 @@
     <title>${board.title}</title>
     <style>
         .post-container { max-width: 900px; margin: 0 auto; }
-        .post-content { min-height: 300px; white-space: pre-wrap; line-height: 1.6; }
-        .comment-item { transition: background 0.2s; }
-        .comment-item:hover { background-color: #f8f9fa; }
+        .post-content { min-height: 300px; white-space: pre-wrap; line-height: 1.8; color: #333; }
+        .comment-item { border-bottom: 1px solid #f1f3f5; }
     </style>
 </head>
 <body class="bg-light">
 <%@ include file="header.jsp" %>
 
 <div class="container py-5 post-container">
-    <%-- 게시글 영역 --%>
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body p-5">
-            <%-- 메타 정보 --%>
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="badge bg-primary px-3 py-2">No. <span id="boardId">${board.id}</span></span>
-                <div class="text-muted small">
+            <div class="mb-3">
+                <%-- 주제 출력 --%>
+                <span class="badge bg-primary opacity-75 mb-2">${board.category}</span>
+                <h1 class="fw-bold display-6">${board.title}</h1>
+                <div class="text-muted small mt-3">
                     <span class="me-3">👤 ${board.writer}</span>
-                    <span>👀 조회수 ${board.hits}</span>
+                    <%-- 본문 시간 --%>
+                    <span class="time-convert" data-time="${board.createdAt}"></span>
+                    <c:if test="${board.createdAt != board.updatedAt}">
+                        <span class="ms-2 text-info fw-bold">(수정됨)</span>
+                    </c:if>
                 </div>
             </div>
-
-            <%-- 제목 --%>
-            <h1 class="fw-bold mb-4">${board.title}</h1>
-            <hr class="text-secondary opacity-25">
-
-            <%-- 본문 --%>
+            <hr class="my-4 opacity-25">
             <div class="post-content fs-5 mb-5">${board.content}</div>
-
-            <%-- 하단 버튼 영역 --%>
-            <div class="d-flex justify-content-between border-top pt-4">
-                <a href="/board/list?page=${param.page}&keyword=${param.keyword}" class="btn btn-outline-dark">
-                    ← 목록으로
-                </a>
-
-                <c:if test="${sessionScope.loginMember.name eq board.writer}">
-                    <div>
-                        <a href="/board/write?id=${board.id}&page=${param.page}&keyword=${param.keyword}"
-                           class="btn btn-warning me-1">수정하기</a>
-                        <button type="button" class="btn btn-danger" onclick="deleteBoard()">삭제하기</button>
-                    </div>
-                </c:if>
-            </div>
         </div>
     </div>
 
@@ -56,97 +39,48 @@
     <div class="card shadow-sm border-0">
         <div class="card-body p-4">
             <h5 class="fw-bold mb-4">💬 댓글 (${comments.size()})</h5>
-
-            <%-- 댓글 입력 --%>
-            <c:if test="${not empty sessionScope.loginMember}">
-                <div class="mb-4 bg-light p-3 rounded">
-                    <textarea id="commentContent" class="form-control mb-2" rows="3"
-                              placeholder="내용을 입력해주세요"></textarea>
-                    <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-primary px-4"
-                                onclick="addComment(${board.id})">댓글 등록</button>
-                    </div>
-                </div>
-            </c:if>
-
-            <%-- 댓글 목록 --%>
             <div id="comment-list">
                 <c:forEach var="comment" items="${comments}">
-                    <div id="comment-container-${comment.id}" class="comment-item border-bottom py-3 px-2">
+                    <div class="comment-item py-3">
                         <div class="d-flex justify-content-between mb-2">
-                            <strong>${comment.writer}</strong>
-                            <small class="text-muted">${comment.createdAt}</small>
+                            <span class="fw-bold">${comment.writer}</span>
+                                <%-- 댓글 시간: 클래스 'time-convert' 부여 --%>
+                            <small class="text-muted time-convert" data-time="${comment.createdAt}">
+                                    ${comment.createdAt}
+                            </small>
                         </div>
-
-                        <p id="content-${comment.id}" class="mb-2 text-secondary">${comment.content}</p>
-
-                        <c:if test="${sessionScope.loginMember.name eq comment.writer}">
-                            <div id="btn-group-${comment.id}" class="text-end">
-                                <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 me-2"
-                                        onclick="showEditForm(${comment.id})">수정</button>
-                                <button type="button" class="btn btn-sm btn-link text-decoration-none text-danger p-0"
-                                        onclick="deleteComment(${comment.id})">삭제</button>
-                            </div>
-                        </c:if>
+                        <p class="text-secondary mb-0">${comment.content}</p>
                     </div>
                 </c:forEach>
-                <c:if test="${empty comments}">
-                    <p class="text-center text-muted py-4">첫 번째 댓글을 남겨보세요!</p>
-                </c:if>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function deleteBoard() {
-        const id = document.getElementById('boardId').innerText;
-        if (!confirm('정말로 삭제하시겠습니까?')) return;
-        fetch(`/api/board/\${id}`, { method: 'DELETE' })
-            .then(async res => {
-                if (res.ok) { alert('삭제되었습니다.'); location.href = '/board/list'; }
-                else { alert(await res.text()); }
-            });
+    // 시간 변환 함수
+    function formatRelativeTime(value) {
+        if (!value) return '';
+        const today = new Date();
+        const timeValue = new Date(value);
+        const betweenTime = Math.floor((today.getTime() - timeValue.getTime()) / 1000 / 60);
+
+        if (betweenTime < 1) return '방금 전';
+        if (betweenTime < 60) return `\${betweenTime}분 전`;
+        const hour = Math.floor(betweenTime / 60);
+        if (hour < 24) return `\${hour}시간 전`;
+        const day = Math.floor(hour / 24);
+        if (day < 8) return `\${day}일 전`;
+
+        return `\${timeValue.getFullYear()}-\${timeValue.getMonth() + 1}-\${timeValue.getDate()}`;
     }
 
-    function addComment(boardId) {
-        const content = document.getElementById('commentContent').value;
-        if(!content.trim()) return alert("내용을 입력하세요.");
-        fetch(`/api/board/\${boardId}/comments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: content, writer: "${sessionScope.loginMember.name}" })
-        }).then(res => { if(res.ok) location.reload(); });
-    }
-
-    function deleteComment(commentId) {
-        if(!confirm("삭제하시겠습니까?")) return;
-        fetch(`/api/board/comments/\${commentId}`, { method: 'DELETE' })
-            .then(res => { if(res.ok) location.reload(); });
-    }
-
-    function showEditForm(id) {
-        const contentP = document.getElementById(`content-\${id}`);
-        const btnGroup = document.getElementById(`btn-group-\${id}`);
-        const originalContent = contentP.innerText;
-
-        contentP.innerHTML = `<textarea id="edit-input-\${id}" class="form-control mb-2">\${originalContent}</textarea>`;
-        btnGroup.innerHTML = `
-            <button type="button" class="btn btn-sm btn-primary" onclick="updateComment(\${id})">저장</button>
-            <button type="button" class="btn btn-sm btn-secondary" onclick="location.reload()">취소</button>
-        `;
-    }
-
-    function updateComment(id) {
-        const newContent = document.getElementById(`edit-input-\${id}`).value;
-        fetch(`/api/board/comments/\${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: newContent })
-        }).then(res => {
-            if (res.ok) { alert("수정되었습니다."); location.reload(); }
+    // 모든 시간 요소 한꺼번에 변환
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.time-convert').forEach(el => {
+            el.innerText = formatRelativeTime(el.getAttribute('data-time'));
         });
-    }
+    });
 </script>
 </body>
 </html>
