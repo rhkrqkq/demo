@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -32,6 +34,9 @@ public class Board {
     private int hits;
 
     private String category;
+
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     @Builder
     public Board(String title, String content, String writer, String category) {

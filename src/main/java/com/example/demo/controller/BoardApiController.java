@@ -10,6 +10,10 @@ import com.example.demo.service.CommentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,8 +33,12 @@ public class BoardApiController {
     }
 
     @GetMapping
-    public List<BoardResponseDTO> list() {
-        return boardService.findAllPost();
+    public Page<BoardResponseDTO> list(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "category", required = false) String category) {
+        Pageable pageable = PageRequest.of(page, 10, Sort.by("id").descending());
+        return boardService.findAllPost(keyword, category, pageable);
     }
 
     @PatchMapping("/{id}")

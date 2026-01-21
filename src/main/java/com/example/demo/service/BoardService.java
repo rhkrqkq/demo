@@ -29,10 +29,24 @@ public class BoardService {
         return boardRepository.save(requestDTO.toEntity()).getId();
     }
 
-    public List<BoardResponseDTO> findAllPost() {
-        return boardRepository.findAll().stream()
-                .map(BoardResponseDTO::new)
-                .collect(Collectors.toList());
+    public Page<BoardResponseDTO> findAllPost(String keyword, String category, Pageable pageable) {
+        Page<Board> boardPage;
+
+        // ALL이거나 비어있을땐 전체 검색으로 생각
+        boolean hasCategory = (category != null && !category.isEmpty() && category.equals("ALL"));
+        // 검색어 존재 여부 확인
+        boolean hasKeyword = (keyword != null && !keyword.trim().isEmpty());
+
+        if (hasCategory && hasKeyword) {
+            boardPage = boardRepository.findByCategoryAndTitleContaining(category, keyword, pageable);
+        } else if (hasCategory) {
+            boardPage = boardRepository.findByCategory(category, pageable);
+        } else if (hasKeyword) {
+            boardPage = boardRepository.findByTitleContaining(keyword, pageable);
+        } else {
+            boardPage = boardRepository.findAll(pageable);
+        }
+        return boardPage.map(BoardResponseDTO::new);
     }
 
     @Transactional
@@ -92,4 +106,12 @@ public class BoardService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public Page<BoardResponseDTO> getPostsByCategory(String category, Pageable pageable) {
+        // 카테고리 값이 있으면 검색
+        if (category == null || category.isEmpty() || category.equals("ALL")) {
+            return boardRepository.findAll(pageable).map(BoardResponseDTO::new);
+        }
+        return boardRepository.findByCategory(category, pageable).map(BoardResponseDTO::new);
+    }
 }

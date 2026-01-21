@@ -29,12 +29,15 @@ public class BoardController {
 
     @GetMapping("/list")
     public String list(Model model, @RequestParam(value = "page", defaultValue = "0") int page,
-                       @RequestParam(value = "keyword", required = false) String keyword) {
+                       @RequestParam(value = "keyword", required = false) String keyword,
+                       @RequestParam(value = "category", required = false) String category) {
         Pageable pageable = PageRequest.of(page, 10, Sort.by("id").descending());
-        Page<BoardResponseDTO> boards = boardService.findAllPost(keyword, pageable);
+        Page<BoardResponseDTO> boards = boardService.findAllPost(keyword, category, pageable);
 
         model.addAttribute("boards", boards);
         model.addAttribute("keyword", keyword);
+        model.addAttribute("category", category);
+
         return "board/list";
     }
 

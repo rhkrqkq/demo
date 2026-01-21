@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -17,6 +19,8 @@ public class BoardResponseDTO {
     private String category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private int commentCount;
+    private List<CommentResponseDTO> comments;
 
     public BoardResponseDTO(Board entity) {
         this.id = entity.getId();
@@ -27,5 +31,13 @@ public class BoardResponseDTO {
         this.category = entity.getCategory();
         this.createdAt = entity.getCreatedAt();
         this.updatedAt = entity.getUpdatedAt();
+
+        if (entity.getComments() != null) {
+            this.comments = entity.getComments().stream()
+                    .map(CommentResponseDTO::new)
+                    .collect(Collectors.toList());
+            this.commentCount = entity.getComments().size();
+        }
     }
+
 }
