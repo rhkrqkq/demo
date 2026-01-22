@@ -33,17 +33,21 @@ public class BoardService {
         Page<Board> boardPage;
 
         // ALL이거나 비어있을땐 전체 검색으로 생각
-        boolean hasCategory = (category != null && !category.isEmpty() && category.equals("ALL"));
+        boolean hasCategory = (category != null && !category.isEmpty() && !category.equals("ALL"));
         // 검색어 존재 여부 확인
         boolean hasKeyword = (keyword != null && !keyword.trim().isEmpty());
 
         if (hasCategory && hasKeyword) {
+            // 특정 주제 내에서 검색어 필터링
             boardPage = boardRepository.findByCategoryAndTitleContaining(category, keyword, pageable);
         } else if (hasCategory) {
+            // 특정 주제만 필터링
             boardPage = boardRepository.findByCategory(category, pageable);
         } else if (hasKeyword) {
+            // 전체 카테고리에서 검색어 필터링
             boardPage = boardRepository.findByTitleContaining(keyword, pageable);
         } else {
+            // 아무 조건이 없거나 카테고리가 "ALL"인 경우 전체 조회
             boardPage = boardRepository.findAll(pageable);
         }
         return boardPage.map(BoardResponseDTO::new);
@@ -81,17 +85,6 @@ public class BoardService {
         // 상세보기 시 조회수 증가
         entity.increaseHits();
         return new BoardResponseDTO(entity);
-    }
-
-    @Transactional(readOnly = true)
-    public Page<BoardResponseDTO> findAllPost(String keyword, Pageable pageable) {
-        Page<Board> page;
-        if (keyword == null || keyword.trim().isEmpty()) {
-            page = boardRepository.findAll(pageable);
-        } else {
-            page = boardRepository.findByTitleContaining(keyword, pageable);
-        }
-        return page.map(BoardResponseDTO::new);
     }
 
     public List<BoardResponseDTO> findMyPosts(String writer) {

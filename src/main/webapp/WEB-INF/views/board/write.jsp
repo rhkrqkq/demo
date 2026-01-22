@@ -20,9 +20,9 @@
                 <%-- 카테고리 선택 --%>
                 <div class="form-floating mb-3">
                     <select class="form-select border-0 bg-light" id="category">
-                        <option value="자유" ${board.category == '자유' ? 'selected' : ''}>자유게시판</option>
-                        <option value="정보" ${board.category == '정보' ? 'selected' : ''}>정보공유</option>
-                        <option value="공지" ${board.category == '공지' ? 'selected' : ''}>공지사항</option>
+                        <option value="자유" ${board.category == 'FREE' ? 'selected' : ''}>자유게시판</option>
+                        <option value="정보" ${board.category == 'INFO' ? 'selected' : ''}>정보공유</option>
+                        <option value="공지" ${board.category == 'NOTICE' ? 'selected' : ''}>공지사항</option>
                     </select>
                     <label for="category">게시판 주제를 선택하세요</label>
                 </div>

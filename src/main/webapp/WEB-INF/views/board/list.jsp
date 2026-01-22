@@ -18,9 +18,11 @@
 
     <div class="mb-4">
         <div class="btn-group shadow-sm" role="group">
+            <%-- category 파라미터 값을 한글로 변경 --%>
             <a href="/board/list?category=ALL&keyword=${keyword}" class="btn btn-outline-primary ${category == 'ALL' || category == null ? 'active' : ''}">전체</a>
-            <a href="/board/list?category=NOTICE&keyword=${keyword}" class="btn btn-outline-primary ${category == 'NOTICE' ? 'active' : ''}">공지사항</a>
-            <a href="/board/list?category=FREE&keyword=${keyword}" class="btn btn-outline-primary ${category == 'FREE' ? 'active' : ''}">자유게시판</a>
+            <a href="/board/list?category=공지&keyword=${keyword}" class="btn btn-outline-primary ${category == '공지' ? 'active' : ''}">공지사항</a>
+            <a href="/board/list?category=자유&keyword=${keyword}" class="btn btn-outline-primary ${category == '자유' ? 'active' : ''}">자유게시판</a>
+            <a href="/board/list?category=정보&keyword=${keyword}" class="btn btn-outline-primary ${category == '정보' ? 'active' : ''}">정보게시판</a>
         </div>
     </div>
 
@@ -37,10 +39,10 @@
                 </thead>
                 <tbody>
                 <c:forEach var="board" items="${boards.content}">
-                    <tr>
+                    <tr><%-- list.jsp의 테이블 본문 안쪽 --%>
                         <td class="text-center">
-                            <span class="badge ${board.category == 'NOTICE' ? 'bg-danger' : 'bg-secondary'} opacity-75">
-                                    ${board.category}
+                            <span class="badge ${board.category == '공지' ? 'bg-danger' : 'bg-secondary'} opacity-75">
+                                ${board.category}
                             </span>
                         </td>
                         <td>

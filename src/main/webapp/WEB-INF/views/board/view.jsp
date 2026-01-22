@@ -36,16 +36,18 @@
         </div>
     </div>
 
-    <%-- 댓글 작성 영역 (새로 추가됨) --%>
+    <%-- 댓글 작성 구역 --%>
     <div class="card shadow-sm border-0 mb-4 comment-input-box">
         <div class="card-body p-4">
             <h6 class="fw-bold mb-3">💬 댓글 남기기</h6>
             <div class="row g-2">
                 <div class="col-md-3">
-                    <input type="text" id="comment-writer" class="form-control" placeholder="작성자" value="${sessionScope.loginMember.name}">
+                    <%-- 로그인한 사용자의 이름을 세션에서 가져와 자동으로 채움 --%>
+                    <input type="text" id="comment-writer" class="form-control bg-light"
+                           value="${sessionScope.loginMember.name}" readonly>
                 </div>
                 <div class="col-12">
-                    <textarea id="comment-content" class="form-control" rows="3" placeholder="타인을 비방하는 댓글은 삭제될 수 있습니다."></textarea>
+                    <textarea id="comment-content" class="form-control" rows="3" placeholder="댓글 내용을 입력하세요."></textarea>
                 </div>
                 <div class="col-12 text-end">
                     <button type="button" class="btn btn-primary px-4" onclick="saveComment(${board.id})">등록</button>
@@ -107,17 +109,17 @@
         const content = document.getElementById('comment-content').value;
 
         if (!writer.trim() || !content.trim()) {
-            alert("작성자와 내용을 모두 입력해주세요.");
+            alert("내용을 입력해주세요.");
             return;
         }
 
         const data = {
-            boardId: boardId,
             writer: writer,
             content: content
         };
 
-        fetch('/api/comments', { // 서버의 CommentApiController 주소
+        // 수정된 경로: /api/board/{id}/comments
+        fetch(`/api/board/\${boardId}/comments`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -125,12 +127,11 @@
             .then(response => {
                 if (response.ok) {
                     alert("댓글이 등록되었습니다.");
-                    location.reload(); // 성공 시 페이지 새로고침하여 댓글 반영
+                    location.reload();
                 } else {
                     alert("등록에 실패했습니다.");
                 }
-            })
-            .catch(error => console.error('Error:', error));
+            });
     }
 
     document.addEventListener("DOMContentLoaded", function() {
