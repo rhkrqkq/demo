@@ -14,9 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity; // [필수 추가] ResponseEntity를 위해 추가
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/board")
@@ -25,7 +24,6 @@ public class BoardApiController {
 
     private final BoardService boardService;
     private final CommentService commentService;
-
 
     @PostMapping
     public Long create(@RequestBody BoardRequestDTO requestDTO) {
@@ -41,19 +39,22 @@ public class BoardApiController {
         return boardService.findAllPost(keyword, category, pageable);
     }
 
-    @PatchMapping("/{id}")
-    public Long update(@PathVariable Long id, @RequestBody BoardRequestDTO requestDTO, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
+    // 게시글 수정 로직 보완
+    @PutMapping("/{id}")
+    public ResponseEntity<Long> update(@PathVariable Long id,
+                                       @RequestBody BoardRequestDTO requestDTO,
+                                       HttpSession session) {
+        // 1. 세션에서 로그인 정보 가져오기
         Member loginMember = (Member) session.getAttribute("loginMember");
 
-        BoardResponseDTO existBoard = boardService.findPostById(id);
-
-        if (!existBoard.getWriter().equals(loginMember.getName())) {
-            throw new RuntimeException("수정 권한이 없습니다.");
+        if (loginMember == null) {
+            // 이 메시지는 GlobalExceptionHandler를 통해 JSON으로 반환됩니다.
+            throw new RuntimeException("로그인이 필요합니다.");
         }
 
-        // 서비스 단으로 로그인 정보와 함께 수정 요청
-        return boardService.update(id, requestDTO, loginMember.getName());
+        // 2. 서비스 호출 시 사용자 이름(name)을 함께 전달하여 본인 확인 수행
+        Long updatedId = boardService.update(id, requestDTO, loginMember.getName());
+        return ResponseEntity.ok(updatedId);
     }
 
     @DeleteMapping("/{id}")
@@ -80,8 +81,18 @@ public class BoardApiController {
         commentService.deleteComment(commentId);
     }
 
+    // 댓글 수정 로직에 권한 확인 추가
     @PatchMapping("/comments/{commentId}")
-    public void updateComment(@PathVariable Long commentId, @RequestBody CommentRequestDTO commentRequestDTO) {
+    public void updateComment(@PathVariable Long commentId,
+                              @RequestBody CommentRequestDTO commentRequestDTO,
+                              HttpSession session) {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        CommentResponseDTO comment = commentService.findByCommentId(commentId);
+
+        if (loginMember == null || !comment.getWriter().equals(loginMember.getName())) {
+            throw new RuntimeException("본인 댓글만 수정할 수 있습니다.");
+        }
+
         commentService.updateComment(commentId, commentRequestDTO);
     }
 }

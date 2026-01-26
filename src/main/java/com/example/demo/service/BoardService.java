@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
-@RequiredArgsConstructor
+@Transactional(readOnly = true)  // 성능 최적화 위해 기본적으로 읽기 전용 (readOnly=true)
+@RequiredArgsConstructor  // final이 붙은 필드를 생성자 주입 방식으로 가져옴
 public class BoardService {
 
     private final BoardRepository boardRepository;
@@ -29,14 +29,16 @@ public class BoardService {
         return boardRepository.save(requestDTO.toEntity()).getId();
     }
 
+    // 게시글 통합 조회
     public Page<BoardResponseDTO> findAllPost(String keyword, String category, Pageable pageable) {
         Page<Board> boardPage;
 
-        // ALL이거나 비어있을땐 전체 검색으로 생각
+        // 카테고리가 비어있지 않거나 ALL이 아닐때만 특정 카테고리로 검색
         boolean hasCategory = (category != null && !category.isEmpty() && !category.equals("ALL"));
-        // 검색어 존재 여부 확인
+        // 검색어가 비어있지 않거나 공백을 제외한 문자열이 없을때 키워드로 검색
         boolean hasKeyword = (keyword != null && !keyword.trim().isEmpty());
 
+        // 카테고리로 검색하면서, 키워드로 검색
         if (hasCategory && hasKeyword) {
             // 특정 주제 내에서 검색어 필터링
             boardPage = boardRepository.findByCategoryAndTitleContaining(category, keyword, pageable);
@@ -50,6 +52,8 @@ public class BoardService {
             // 아무 조건이 없거나 카테고리가 "ALL"인 경우 전체 조회
             boardPage = boardRepository.findAll(pageable);
         }
+
+        // Entity를 DTO로 변환
         return boardPage.map(BoardResponseDTO::new);
     }
 

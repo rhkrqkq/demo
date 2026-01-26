@@ -32,13 +32,18 @@ public class BoardController {
                        @RequestParam(value = "page", defaultValue = "0") int page,
                        @RequestParam(value = "keyword", required = false) String keyword,
                        @RequestParam(value = "category", required = false) String category) {
+        // 페이징 설정 객체 (페이지 번호, 한 페이지 당 개수, 정렬 순서)
         Pageable pageable = PageRequest.of(page, 10, Sort.by("id").descending());
+
+        // Service에 findAllPost 를 통해 데이터 요청
         Page<BoardResponseDTO> boards = boardService.findAllPost(keyword, category, pageable);
 
+        // view로 데이터 전달
         model.addAttribute("boards", boards);
         model.addAttribute("keyword", keyword);
         model.addAttribute("category", category);
 
+        // list.jsp 실행
         return "board/list";
     }
 
@@ -66,6 +71,18 @@ public class BoardController {
             model.addAttribute("isBookmarked", bookmarkService.isBookmarked(id, loginMember.getLoginId()));
         }
         return "board/view";
+    }
+
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable Long id, Model model) {
+        // 1. 수정할 게시글 데이터를 조회합니다.
+        BoardResponseDTO board = boardService.findPostById(id);
+
+        // 2. 모델에 데이터를 담아 JSP로 전달합니다.
+        model.addAttribute("board", board);
+
+        // 3. board/edit.jsp 파일로 이동합니다.
+        return "board/edit";
     }
 
 }
