@@ -58,8 +58,8 @@ public class BoardApiController {
     }
 
     @DeleteMapping("/{id}")
-    public Long delete(@PathVariable Long id) {
-        return boardService.delete(id);
+    public Long delete(@PathVariable Long id, String loginName) {
+        return boardService.delete(id, loginName);
     }
 
     @PostMapping("/{id}/comments")
@@ -78,7 +78,7 @@ public class BoardApiController {
             throw new RuntimeException("본인 댓글만 삭제할 수 있습니다.");
         }
 
-        commentService.deleteComment(commentId);
+        commentService.deleteComment(commentId, loginMember.getName());
     }
 
     // 댓글 수정 로직에 권한 확인 추가
@@ -93,6 +93,6 @@ public class BoardApiController {
             throw new RuntimeException("본인 댓글만 수정할 수 있습니다.");
         }
 
-        commentService.updateComment(commentId, commentRequestDTO);
+        commentService.updateComment(commentId, commentRequestDTO, loginMember.getName());
     }
 }

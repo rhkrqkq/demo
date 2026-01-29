@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.config.JwtProvider;
 import com.example.demo.domain.Member;
 import com.example.demo.repository.MemberRepository;
 import com.example.demo.dto.MemberRequestDTO;
@@ -10,6 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,14 +20,15 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping
+@RequestMapping("/board")
 public class MemberController {
-    @Autowired
+
     private final MemberService memberService;
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final BoardService boardService;
     private final BookmarkService bookmarkService;
+    private final JwtProvider jwtProvider;
 
     // 회원가입 페이지 이동
     @GetMapping("/signup")
@@ -55,24 +59,20 @@ public class MemberController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String loginId, @RequestParam String password, HttpServletRequest request) {
-        Member loginMember = memberService.login(loginId, password);
+    @ResponseBody // 토큰 데이터를 반환하기 위해 필수
+    public ResponseEntity<?> login(@RequestBody MemberRequestDTO loginDto) {
+        Member loginMember = memberService.login(loginDto.getLoginId(), loginDto.getPassword());
 
-        if (loginMember == null) {
-            return "login";
+        if (loginMember != null) {
+            // 토큰 생성 (사용자 이름을 기반으로 생성)
+            String token = jwtProvider.createToken(loginMember.getName());
+            return ResponseEntity.ok(token); // 성공 시 200 OK와 함께 토큰 전송
         }
-
-        HttpSession session = request.getSession();
-        session.setAttribute("loginMember", loginMember);
-
-        return "redirect:/board/list";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 틀렸습니다.");
     }
 
     @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        if (session != null) {
-            session.invalidate();
-        }
+    public String logout() {
         return "redirect:/board/list";
     }
 

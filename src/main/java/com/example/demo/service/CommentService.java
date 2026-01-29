@@ -41,8 +41,14 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(Long commentId) {
-        commentRepository.deleteById(commentId);
+    public void deleteComment(Long commentId, String loginName) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(()-> new RuntimeException("해당 댓글이 없습니다"));
+
+        if (!comment.getWriter().equals(loginName)) {
+            throw new RuntimeException("본인 댓글만 삭제할 수 있습니다.");
+        }
+        commentRepository.delete(comment);
     }
 
     @Transactional(readOnly = true)
@@ -53,9 +59,13 @@ public class CommentService {
     }
 
     @Transactional
-    public void updateComment (Long id, CommentRequestDTO commentRequestDTO) {
-        Comment comment = commentRepository.findById(id)
+    public void updateComment (Long commentId, CommentRequestDTO commentRequestDTO, String loginName) {
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(()-> new IllegalArgumentException("해당 댓글이 없습니다."));
+
+        if (!comment.getWriter().equals(loginName)) {
+            throw new RuntimeException("본인 댓글만 수정할 수 있습니다.");
+        }
         comment.update(commentRequestDTO.getContent());
     }
 

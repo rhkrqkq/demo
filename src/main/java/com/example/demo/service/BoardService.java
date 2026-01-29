@@ -73,10 +73,13 @@ public class BoardService {
     }
 
     @Transactional
-    public Long delete(Long id) {
+    public Long delete(Long id, String loginName) {
         Board board = boardRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다."));
 
+        if (!board.getWriter().equals(loginName)) {
+            throw new RuntimeException("본인 게시글만 삭제할 수 있습니다.");
+        }
         boardRepository.delete(board);
         return id;
     }

@@ -36,7 +36,7 @@
     <div class="card auth-card shadow-sm">
         <div class="card-body p-5">
             <h3 class="text-center fw-bold mb-4">회원가입</h3>
-            <form action="/signup" method="post">
+            <form action="/board/signup" method="post">
                 <div class="mb-3">
                     <label class="form-label small fw-bold">아이디</label>
                     <input type="text" name="loginId" class="form-control bg-light" placeholder="ID" required>
@@ -52,7 +52,7 @@
                 <button type="submit" class="btn btn-primary w-100 btn-auth">회원가입 완료</button>
             </form>
             <div class="text-center mt-4">
-                <a href="/login" class="small text-muted text-decoration-none">이미 계정이 있나요? 로그인</a>
+                <a href="/board/login" class="small text-muted text-decoration-none">이미 계정이 있나요? 로그인</a>
             </div>
         </div>
     </div>

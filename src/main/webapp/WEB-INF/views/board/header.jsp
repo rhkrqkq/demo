@@ -12,13 +12,13 @@
             <ul class="navbar-nav ms-auto align-items-center">
                 <c:choose>
                     <c:when test="${empty sessionScope.loginMember}">
-                        <li class="nav-item"><a class="nav-link" href="/login">로그인</a></li>
-                        <li class="nav-item"><a class="nav-link btn btn-outline-light btn-sm ms-lg-2" href="/signup">회원가입</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/board/login">로그인</a></li>
+                        <li class="nav-item"><a class="nav-link btn btn-outline-light btn-sm ms-lg-2" href="/board/signup">회원가입</a></li>
                     </c:when>
                     <c:otherwise>
                         <li class="nav-item"><span class="nav-link text-white me-2">👋 ${sessionScope.loginMember.name}님</span></li>
-                        <li class="nav-item"><a class="nav-link" href="/mypage">마이페이지</a></li>
-                        <li class="nav-item"><a class="nav-link text-danger" href="/logout">로그아웃</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/board/mypage">마이페이지</a></li>
+                        <li class="nav-item"><a class="nav-link text-danger" href="/board/logout">로그아웃</a></li>
                     </c:otherwise>
                 </c:choose>
             </ul>

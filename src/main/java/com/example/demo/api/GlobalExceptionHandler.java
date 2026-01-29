@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     // 그 외의 정의되지 않은 모든 예외
     public ResponseEntity<ErrorResponse> handleAllException(Exception e) {
-        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "UNKNOWN_ERROR", "서버 내부 오류가 발생했습니다.");
+        return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "DEBUG_ERROR", e.getMessage());
     }
 
     private ResponseEntity<ErrorResponse> createErrorResponse(HttpStatus status, String code, String message) {
