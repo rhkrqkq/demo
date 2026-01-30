@@ -17,6 +17,13 @@ public class SecurityConfig {
     private final JwtProvider jwtProvider;
 
     @Bean
+    public org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico")
+                .requestMatchers("/WEB-INF/views/**"); // JSP 파일 경로를 보안 필터에서 완전히 제외
+    }
+
+    @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
@@ -28,10 +35,18 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/board/login", "/board/signup", "/board/list").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/WEB-INF/views/**").permitAll()
-                        .anyRequest().authenticated())
+                        // [포인트 1] JSP 포워딩을 무조건 허용해야 튕기지 않습니다.
+                        .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.FORWARD).permitAll()
+                        // [포인트 2] 허용 경로에 /board/list가 정확히 포함되어야 합니다.
+                        .requestMatchers("/mypage").authenticated()
+                        .requestMatchers("/", "/board/list", "/board/view/**", "/board/login", "/board/signup").permitAll()
+                        .requestMatchers("/api/member/**", "/api/board/list").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/WEB-INF/views/**").permitAll()
+
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }

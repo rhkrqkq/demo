@@ -40,8 +40,7 @@ public class BookmarkService {
 
     @Transactional(readOnly = true)
     public List<Bookmark> findMyBookmarks(String loginId) {
-        Optional<Member> member = memberRepository.findByLoginId(loginId);
-        return bookmarkRepository.findByMemberOrderByIdDesc(member);
+        return bookmarkRepository.findAllByMember_LoginId(loginId);
     }
 
     @Transactional(readOnly = true)

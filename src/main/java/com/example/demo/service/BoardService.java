@@ -1,7 +1,6 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.Board;
-import com.example.demo.domain.Comment;
 import com.example.demo.dto.BoardRequestDTO;
 import com.example.demo.dto.BoardResponseDTO;
 import com.example.demo.dto.CommentResponseDTO;

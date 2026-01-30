@@ -44,7 +44,7 @@ public class BoardController {
         model.addAttribute("category", category);
 
         // list.jsp 실행
-        return "board/list";
+        return "list";
     }
 
     @GetMapping("/write")
@@ -55,7 +55,7 @@ public class BoardController {
         } else {
             model.addAttribute("board", new BoardResponseDTO());
         }
-        return "board/write";
+        return "write";
     }
 
     @GetMapping("/view/{id}")
@@ -70,7 +70,7 @@ public class BoardController {
         if (loginMember != null) {
             model.addAttribute("isBookmarked", bookmarkService.isBookmarked(id, loginMember.getLoginId()));
         }
-        return "board/view";
+        return "view";
     }
 
     @GetMapping("/edit/{id}")
@@ -81,8 +81,8 @@ public class BoardController {
         // 2. 모델에 데이터를 담아 JSP로 전달합니다.
         model.addAttribute("board", board);
 
-        // 3. board/edit.jsp 파일로 이동합니다.
-        return "board/edit";
+        // 3. edit.jsp 파일로 이동합니다.
+        return "edit";
     }
 
 }

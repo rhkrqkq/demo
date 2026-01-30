@@ -36,20 +36,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String resolveToken(HttpServletRequest request) {
-        // 1. 헤더에서 토큰 찾기
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
-        }
-
-        // 2. 쿠키에서 토큰 찾기 (추가)
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
+                // 브라우저에서 보낸 쿠키 이름과 일치하는지 확인
                 if ("accessToken".equals(cookie.getName())) {
+                    System.out.println("DEBUG: 토큰 발견 -> " + cookie.getValue());
                     return cookie.getValue();
                 }
             }
         }
+        System.out.println("DEBUG: 쿠키에 토늘이 없습니다.");
         return null;
     }
 }

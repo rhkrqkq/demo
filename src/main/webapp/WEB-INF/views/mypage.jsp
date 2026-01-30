@@ -5,92 +5,50 @@
 <head>
     <meta charset="UTF-8">
     <title>마이페이지</title>
-    <style>
-        .nav-pills .nav-link { color: #666; border-radius: 10px; padding: 12px 20px; }
-        .nav-pills .nav-link.active { background-color: #0d6efd; color: white; }
-        .item-card { transition: transform 0.2s; border-radius: 12px; }
-        .item-card:hover { transform: translateY(-3px); }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-<%@ include file="board/header.jsp" %>
+<%@ include file="header.jsp" %>
+<div class="container py-5">
+    <h3 class="fw-bold mb-4">${loginMemberName}님의 마이페이지</h3>
 
-<div class="container py-5" style="max-width: 850px;">
-    <div class="d-flex align-items-center mb-5">
-        <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center shadow" style="width: 60px; height: 60px; font-size: 1.5rem;">
-            ${sessionScope.loginMember.name.substring(0,1)}
-        </div>
-        <div class="ms-3">
-            <h3 class="fw-bold mb-0">${sessionScope.loginMember.name}님, 반갑습니다!</h3>
-        </div>
-    </div>
-
-    <%-- 탭 메뉴 --%>
-    <ul class="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm" id="pills-tab" role="tablist">
-        <li class="nav-item flex-fill text-center" role="presentation">
-            <button class="nav-link active w-100 fw-bold" id="posts-tab" data-bs-toggle="pill" data-bs-target="#posts-content" type="button">내가 쓴 글</button>
-        </li>
-        <li class="nav-item flex-fill text-center" role="presentation">
-            <button class="nav-link w-100 fw-bold" id="bookmarks-tab" data-bs-toggle="pill" data-bs-target="#bookmarks-content" type="button">⭐ 북마크</button>
-        </li>
-    </ul>
-
-    <%-- 탭 내용 --%>
-    <div class="tab-content mt-3">
-        <%-- 내 게시글 탭 --%>
-        <div class="tab-pane fade show active" id="posts-content" role="tabpanel">
-            <div class="row g-3">
-                <c:forEach var="post" items="${myPosts}">
-                    <div class="col-12">
-                        <div class="card item-card border-0 shadow-sm">
-                            <div class="card-body p-4 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="fw-bold mb-1">
-                                        <a href="/board/view/${post.id}" class="text-decoration-none text-dark">${post.title}</a>
-                                    </h5>
-                                    <small class="text-muted">조회수 ${post.hits} · ${post.createdAt}</small>
-                                </div>
-                                <span class="badge bg-light text-dark border">작성완료</span>
-                            </div>
-                        </div>
-                    </div>
-                </c:forEach>
-                <c:if test="${empty myPosts}">
-                    <div class="text-center py-5 bg-white rounded shadow-sm">
-                        <p class="text-muted mb-0">아직 작성한 게시글이 없습니다.</p>
-                    </div>
-                </c:if>
-            </div>
-        </div>
-
-        <%-- 북마크 탭 --%>
-        <div class="tab-pane fade" id="bookmarks-content" role="tabpanel">
-            <div class="row g-3">
-                <c:forEach var="mark" items="${myBookmarks}">
-                    <div class="col-12">
-                        <div class="card item-card border-0 shadow-sm border-start border-warning border-4">
-                            <div class="card-body p-4 d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="fw-bold mb-1">
-                                        <a href="/board/view/${mark.board.id}" class="text-decoration-none text-dark">${mark.board.title}</a>
-                                    </h5>
-                                    <small class="text-muted">작성자: ${mark.board.writer} · 조회수 ${mark.board.hits}</small>
-                                </div>
-                                <span class="text-warning fs-4">★</span>
-                            </div>
-                        </div>
-                    </div>
-                </c:forEach>
-                <c:if test="${empty myBookmarks}">
-                    <div class="text-center py-5 bg-white rounded shadow-sm">
-                        <p class="text-muted mb-0">북마크한 게시글이 없습니다.</p>
-                    </div>
-                </c:if>
-            </div>
-        </div>
+    <div class="card shadow-sm border-0 p-4 mb-4">
+        <h5 class="fw-bold mb-3">내가 등록한 북마크</h5>
+        <table class="table table-hover">
+            <thead class="table-light">
+            <tr>
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성자</th>
+                <th>관리</th>
+            </tr>
+            </thead>
+            <tbody>
+            <c:forEach var="bookmark" items="${bookmarks}">
+                <tr>
+                    <td>${bookmark.board.id}</td>
+                    <td><a href="/board/view/${bookmark.board.id}">${bookmark.board.title}</a></td>
+                    <td>${bookmark.board.writer}</td>
+                    <td>
+                        <button onclick="removeBookmark(${bookmark.board.id})" class="btn btn-sm btn-danger">삭제</button>
+                    </td>
+                </tr>
+            </c:forEach>
+            <c:if test="${empty bookmarks}">
+                <tr><td colspan="4" class="text-center text-muted">등록된 북마크가 없습니다.</td></tr>
+            </c:if>
+            </tbody>
+        </table>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    async function removeBookmark(boardId) {
+        if(!confirm("북마크를 해제하시겠습니까?")) return;
+        const res = await fetch('/api/bookmark/' + boardId, { method: 'POST' });
+        if (res.ok) location.reload();
+        else alert("처리에 실패했습니다.");
+    }
+</script>
 </body>
 </html>
