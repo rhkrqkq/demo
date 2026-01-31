@@ -20,14 +20,17 @@ public class BookmarkApiController {
 
     @PostMapping("/{boardId}")
     public boolean toggleBookmark(@PathVariable Long boardId, Authentication auth) {
-        if (auth == null) {
-            throw new RuntimeException("로그인이 필요합니다."); // 토큰이 없으면 여기서 에러 발생
-        }
+        String loginId = auth.getName();
 
-        String name = auth.getName(); // JwtAuthenticationFilter에서 저장한 Subject(이름)
-        Member member = memberRepository.findByName(name)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        // DB 조회 전후로 로그를 찍어 확실히 확인
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> {
+                    System.out.println("에러 발생: DB에 " + loginId + " 회원이 없습니다.");
+                    return new RuntimeException("사용자 찾기 실패");
+                });
 
+        System.out.println("회원 찾기 성공: " + member.getName());
         return bookmarkService.toggleBookmark(boardId, member.getLoginId());
     }
+
 }

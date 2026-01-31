@@ -23,17 +23,22 @@ public class BookmarkService {
     @Transactional
     public boolean toggleBookmark(Long boardId, String loginId) {
         Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new RuntimeException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("사용자 없음"));
         Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("게시물 없음"));
 
-        Optional<Bookmark> bookmark = bookmarkRepository.findByMemberAndBoard(member, board);
+        // 기존 북마크 확인
+        Optional<Bookmark> existing = bookmarkRepository.findByMemberAndBoard(member, board);
 
-        if (bookmark.isPresent()) {
-            bookmarkRepository.delete(bookmark.get());
+        if (existing.isPresent()) {
+            bookmarkRepository.delete(existing.get());
             return false;
         } else {
-            bookmarkRepository.save(Bookmark.builder().member(member).board(board).build());
+            Bookmark bookmark = Bookmark.builder()
+                    .member(member) // 이 member 객체가 DB의 PK(숫자)와 연결됩니다.
+                    .board(board)
+                    .build();
+            bookmarkRepository.save(bookmark);
             return true;
         }
     }

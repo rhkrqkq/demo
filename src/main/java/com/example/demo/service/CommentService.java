@@ -20,15 +20,16 @@ public class CommentService {
     private final BoardRepository boardRepository;
 
     @Transactional
-    public Long saveComment(Long boardId, CommentRequestDTO dto) {
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
+    public Long saveComment(CommentRequestDTO dto, String writer) {
+        Board board = boardRepository.findById(dto.getBoardId())
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
         Comment comment = Comment.builder()
-                .content(dto.getContent())
-                .writer(dto.getWriter())
                 .board(board)
+                .content(dto.getContent())
+                .writer(writer)
                 .build();
+        System.out.println("전달된 게시글 ID: " + dto.getBoardId());
 
         return commentRepository.save(comment).getId();
     }

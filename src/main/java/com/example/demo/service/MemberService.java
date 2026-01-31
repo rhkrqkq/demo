@@ -27,7 +27,7 @@ public class MemberService {
         }
 
         // Member 객체가 아닌, 생성된 '토큰 문자열'을 리턴해야 합니다.
-        return jwtProvider.createToken(m.getName());
+        return jwtProvider.createToken(m.getLoginId());
     }
 
     @Transactional

@@ -24,8 +24,14 @@ public class BoardService {
     private final CommentRepository commentRepository;
 
     @Transactional
-    public Long savePost(BoardRequestDTO requestDTO) {
-        return boardRepository.save(requestDTO.toEntity()).getId();
+    public Long savePost(BoardRequestDTO dto) {
+        Board board = Board.builder()
+                .category(dto.getCategory()) // 카테고리 셋팅
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .writer(dto.getWriter())
+                .build();
+        return boardRepository.save(board).getId();
     }
 
     // 게시글 통합 조회
@@ -112,5 +118,9 @@ public class BoardService {
             return boardRepository.findAll(pageable).map(BoardResponseDTO::new);
         }
         return boardRepository.findByCategory(category, pageable).map(BoardResponseDTO::new);
+    }
+
+    public List<Board> findAllByWriter(String writer) {
+        return boardRepository.findAllByWriter(writer);
     }
 }

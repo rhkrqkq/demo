@@ -28,11 +28,9 @@ public class BoardApiController {
 
     @PostMapping
     public Long create(@RequestBody BoardRequestDTO requestDTO, Authentication authentication) {
-        if (authentication == null) {
-            throw new RuntimeException("로그인 정보가 없습니다.");
-        }
+        if (authentication == null) throw new RuntimeException("로그인이 필요합니다.");
 
-        // 토큰에서 추출한 사용자 이름을 작성자로 강제 설정
+        // [핵심] 로그인한 사람의 이름을 작성자로 강제 설정
         requestDTO.setWriter(authentication.getName());
 
         return boardService.savePost(requestDTO);
@@ -48,18 +46,12 @@ public class BoardApiController {
     }
 
     // 게시글 수정 로직 보완
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Long> update(@PathVariable Long id,
                                        @RequestBody BoardRequestDTO requestDTO,
-                                       org.springframework.security.core.Authentication authentication) {
-        // 1. Authentication에서 이름 가져오기 (JwtAuthenticationFilter에서 설정함)
-        if (authentication == null) {
-            throw new RuntimeException("로그인이 필요합니다.");
-        }
-        String loginName = authentication.getName();
-
-        // 2. 서비스 호출 시 사용자 이름을 전달
-        Long updatedId = boardService.update(id, requestDTO, loginName);
+                                       Authentication authentication) {
+        if (authentication == null) throw new RuntimeException("로그인이 필요합니다.");
+        Long updatedId = boardService.update(id, requestDTO, authentication.getName());
         return ResponseEntity.ok(updatedId);
     }
 
@@ -69,17 +61,18 @@ public class BoardApiController {
         return boardService.delete(id, authentication.getName());
     }
 
-    @PostMapping("/{id}/comments")
-    public Long saveComment(@PathVariable Long id,
-                            @RequestBody CommentRequestDTO requestDTO,
-                            org.springframework.security.core.Authentication authentication) {
-        // [수정] 세션 로직 제거. Authentication에서 이름을 가져옵니다.
-        if (authentication == null) throw new RuntimeException("인증 정보가 없습니다.");
+    @PostMapping("/comments")
+    public ResponseEntity<Long> saveComment(@RequestBody CommentRequestDTO requestDTO, Authentication authentication) {
+        if (authentication == null) return ResponseEntity.status(401).build();
 
-        String loginName = authentication.getName(); // JwtAuthenticationFilter에서 저장한 name
-        requestDTO.setWriter(loginName);
+        // 1. 작성자 이름 추출 (abc 등)
+        String writer = authentication.getName();
 
-        return commentService.saveComment(id, requestDTO);
+        // 2. [수정] 서비스 정의에 맞게 (DTO, String) 순서로 호출
+        // 기존에 에러가 났던 requestDTO.getBoardId() 인자를 제거합니다.
+        Long commentId = commentService.saveComment(requestDTO, writer);
+
+        return ResponseEntity.ok(commentId);
     }
 
     @DeleteMapping("/comments/{commentId}")

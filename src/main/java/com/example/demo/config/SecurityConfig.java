@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,16 +36,23 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // [포인트 1] JSP 포워딩을 무조건 허용해야 튕기지 않습니다.
                         .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.FORWARD).permitAll()
-                        // [포인트 2] 허용 경로에 /board/list가 정확히 포함되어야 합니다.
-                        .requestMatchers("/mypage").authenticated()
-                        .requestMatchers("/", "/board/list", "/board/view/**", "/board/login", "/board/signup").permitAll()
-                        .requestMatchers("/api/member/**", "/api/board/list").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/WEB-INF/views/**").permitAll()
-
+                        // [변경] 게시판 목록 및 상세 보기를 인증 구역으로 이동
+                        .requestMatchers("/board/list", "/board/view/**", "/board/write", "/board/mypage").authenticated()
+                        .requestMatchers("/api/board/**").authenticated()
+                        // 로그인, 회원가입, 홈 화면만 허용
+                        .requestMatchers("/", "/board/login", "/board/signup", "/api/member/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(ex -> ex.authenticationEntryPoint((request, response, authException) -> {
+                    // 인증 안 된 상태에서 API 호출 시 401 반환 (JS에서 인식 가능하게)
+                    if (request.getRequestURI().startsWith("/api/")) {
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    } else {
+                        response.sendRedirect("/");
+                    }
+                }))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
