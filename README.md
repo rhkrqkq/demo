@@ -2,7 +2,7 @@
 - Language: Java
 - Database: MySQL
 
-- Authentication: JWT (구현예정)
+- Authentication: JWT
 
 - Build Tool: Gradle
 
