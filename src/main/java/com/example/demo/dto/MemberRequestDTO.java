@@ -13,7 +13,12 @@ public class MemberRequestDTO {
     private String password;
     private String name;
 
-    public Member toEntity() {
-        return new Member(loginId, password, name);
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    public static class MemberJoinRequestDTO {
+        private String loginId;
+        private String password;
+        private String name;
     }
 }

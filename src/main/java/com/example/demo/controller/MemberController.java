@@ -23,7 +23,7 @@ public class MemberController {
 
     @GetMapping("/board/login")
     public String loginPage() {
-        return "login"; // views/login.jsp 호출
+        return "login";
     }
 
     @GetMapping("/board/signup")
@@ -33,11 +33,12 @@ public class MemberController {
 
     @GetMapping("/board/mypage")
     public String myPage(Authentication auth, Model model) {
-        if (auth == null) return "redirect:/board/login";
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/board/login";
+        }
 
-        String loginId = auth.getName(); // "abc"
+        String loginId = auth.getName();
 
-        // 데이터 조회
         List<Bookmark> bookmarks = bookmarkService.findMyBookmarks(loginId);
         List<Board> myBoards = boardService.findAllByWriter(loginId);
 
